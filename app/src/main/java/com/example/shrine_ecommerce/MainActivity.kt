@@ -3,44 +3,29 @@ package com.example.shrine_ecommerce
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.shrine_ecommerce.ui.theme.ShrineECommerceTheme
+import androidx.compose.material.ExperimentalMaterialApi
+import com.example.shrine_ecommerce.ui.theme.ShrineComposeTheme
 
+@ExperimentalMaterialApi
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ShrineECommerceTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
+            ShrineComposeTheme {
+                ShrineApp()
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
+@ExperimentalMaterialApi
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    ShrineECommerceTheme {
-        Greeting("Android")
+fun AppPreview() {
+    ShrineComposeTheme {
+        ShrineApp()
+
     }
 }
