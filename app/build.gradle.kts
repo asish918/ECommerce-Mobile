@@ -98,6 +98,9 @@ dependencies {
 
     // Pagination
     implementation("androidx.paging:paging-compose:3.2.1")
+
+    // Timber
+    implementation("com.jakewharton.timber:timber:5.0.1")
 }
 
 // Allow references to generated code
