@@ -1,4 +1,4 @@
-package com.example.shrine_ecommerce
+package com.example.shrine_ecommerce.utils
 
 import com.example.shrine_ecommerce.R
 

@@ -31,13 +31,13 @@ data class Products(
     @SerializedName("images")
     val images: List<Images>,
     @SerializedName("category")
-    val category: List<Category>,
+    val category: Category,
     @SerializedName("color")
-    val color: List<Color>,
+    val color: Color,
     @SerializedName("size")
-    val size: List<Size>,
+    val size: Size,
 
-) : Parcelable {
+    ) : Parcelable {
     @Parcelize
     data class Images(
         @SerializedName("id")

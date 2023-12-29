@@ -1,4 +1,4 @@
-package com.example.shrine_ecommerce
+package com.example.shrine_ecommerce.ui
 
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import com.example.shrine_ecommerce.utils.ItemData
 import com.example.shrine_ecommerce.ui.theme.ShrineScrimColor
 
 enum class FirstAddCartItemState {

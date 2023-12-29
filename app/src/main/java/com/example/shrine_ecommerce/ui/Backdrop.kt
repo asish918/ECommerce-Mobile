@@ -1,4 +1,4 @@
-package com.example.shrine_ecommerce
+package com.example.shrine_ecommerce.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -65,8 +65,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.shrine_ecommerce.R
+import com.example.shrine_ecommerce.utils.ItemData
 import com.example.shrine_ecommerce.ui.theme.ShrineScrimColor
 import com.example.shrine_ecommerce.ui.theme.ShrineComposeTheme
+import com.example.shrine_ecommerce.model.Category
+import com.example.shrine_ecommerce.model.Products
+import com.example.shrine_ecommerce.viewmodels.HomeViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -275,7 +280,8 @@ fun AnimatedVisibilityScope.MenuItem(
 private fun NavigationMenu(
     modifier: Modifier = Modifier,
     backdropRevealed: Boolean = true,
-    activeCategory: Category = Category.All,
+    categories: List<Category>,
+    activeCategory: Category,
     onMenuSelect: (Category) -> Unit = {}
 ) {
     Column(
@@ -293,7 +299,6 @@ private fun NavigationMenu(
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val categories = Category.values()
 
                 categories.forEachIndexed { idx, category ->
                     MenuItem(
@@ -301,7 +306,7 @@ private fun NavigationMenu(
                         index = idx
                     ) {
                         MenuText(
-                            text = category.toString(),
+                            text = category.name,
                             activeDecoration = {
                                 if (category == activeCategory) {
                                     Image(
@@ -329,32 +334,36 @@ private fun NavigationMenu(
     }
 }
 
-@Preview
-@Composable
-fun NavigationMenuPreview() {
-    ShrineComposeTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            var activeCategory by remember { mutableStateOf(Category.Accessories) }
-            NavigationMenu(
-                modifier = Modifier.padding(vertical = 8.dp),
-                activeCategory = activeCategory,
-                onMenuSelect = { activeCategory = it }
-            )
-        }
-    }
-}
+//@Preview
+//@Composable
+//fun NavigationMenuPreview() {
+//    ShrineComposeTheme {
+//        Surface(color = MaterialTheme.colors.background) {
+//            var activeCategory by remember { mutableStateOf(Category.Accessories) }
+//            NavigationMenu(
+//                modifier = Modifier.padding(vertical = 8.dp),
+//                activeCategory = activeCategory
+//            ) { activeCategory = it }
+//        }
+//    }
+//}
 
 @ExperimentalMaterialApi
 @Composable
 fun Backdrop(
     showScrim: Boolean = false,
-    onAddCartItem: (ItemData) -> Unit = {},
-    onBackdropReveal: (Boolean) -> Unit = {}
+    onAddCartItem: (Products) -> Unit = {},
+    onBackdropReveal: (Boolean) -> Unit = {},
+    viewModel: HomeViewModel
 ) {
+    val categories = viewModel.categoryList
+    val products = viewModel.productList
+
     val scaffoldState = rememberBackdropScaffoldState(BackdropValue.Concealed)
     var backdropRevealed by rememberSaveable { mutableStateOf(scaffoldState.isRevealed) }
     val scope = rememberCoroutineScope()
-    var activeCategory by rememberSaveable { mutableStateOf(Category.All) }
+    var activeCategory by rememberSaveable { mutableStateOf(categories[0]) }
+
 
     BackdropScaffold(
         scaffoldState = scaffoldState,
@@ -388,9 +397,7 @@ fun Backdrop(
                     drawContent()
                     drawRect(color = ShrineScrimColor, alpha = scrimAlpha)
                 },
-                items = SampleItems.filter {
-                    activeCategory == Category.All || it.category == activeCategory
-                },
+                items = products.toList(),
                 onAddCartItem = onAddCartItem
             )
         },
@@ -402,22 +409,23 @@ fun Backdrop(
                 modifier = Modifier.padding(top = 12.dp, bottom = 32.dp),
                 backdropRevealed = backdropRevealed,
                 activeCategory = activeCategory,
-                onMenuSelect = {
-                    backdropRevealed = false
-                    onBackdropReveal(false)
-                    activeCategory = it
-                    scope.launch { scaffoldState.conceal() }
-                }
-            )
+                categories = categories.toList()
+            ) {
+                backdropRevealed = false
+                onBackdropReveal(false)
+                activeCategory = it
+                scope.launch { scaffoldState.conceal() }
+                viewModel.filterBySetSelectedCategory(activeCategory)
+            }
         },
     )
 }
 
-@ExperimentalMaterialApi
-@Preview
-@Composable
-fun BackdropPreview() {
-    ShrineComposeTheme {
-        Backdrop()
-    }
-}
+//@ExperimentalMaterialApi
+//@Preview
+//@Composable
+//fun BackdropPreview() {
+//    ShrineComposeTheme {
+//        Backdrop()
+//    }
+//}

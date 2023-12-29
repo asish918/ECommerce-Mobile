@@ -1,4 +1,4 @@
-package com.example.shrine_ecommerce
+package com.example.shrine_ecommerce.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -23,7 +23,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -49,29 +48,32 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-//import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.example.shrine_ecommerce.R
+import com.example.shrine_ecommerce.model.Products
 import com.example.shrine_ecommerce.ui.theme.ShrineComposeTheme
+import com.example.shrine_ecommerce.utils.Vendor
+import com.skydoves.landscapist.CircularReveal
+import com.skydoves.landscapist.ShimmerParams
+import com.skydoves.landscapist.coil.CoilImage
 import kotlin.math.min
 
 @Composable
@@ -113,7 +115,7 @@ fun CartHeaderPreview() {
 @Composable
 private fun CartItem(
     modifier: Modifier = Modifier,
-    item: ItemData,
+    item: Products,
     onRemoveAction: () -> Unit = {}
 ) {
     Row(
@@ -137,12 +139,40 @@ private fun CartItem(
                 Modifier.padding(vertical = 20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = painterResource(id = item.photoResId),
-                    contentDescription = "Image for: ${item.title}",
+                CoilImage(
+                    imageModel = "https://picsum/photos/200/200",
+                    shimmerParams = ShimmerParams(
+                        baseColor = Color.White,
+                        highlightColor = Color.Gray,
+                        durationMillis = 500,
+                        dropOff = 0.65F,
+                        tilt = 20F
+                    ),
+                    failure = {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.image_not_available),
+                                contentDescription = "no image"
+                            )
+                        }
+                    },
+                    alignment = Alignment.TopCenter,
+                    previewPlaceholder = R.drawable.popcorn,
                     contentScale = ContentScale.FillHeight,
-                    modifier = Modifier.size(80.dp)
+                    circularReveal = CircularReveal(duration = 1000),
+                    modifier = Modifier.size(80.dp),
+                    contentDescription = "Product item"
                 )
+//                Image(
+//                    painter = painterResource(id = item.images[0].url),
+//                    contentDescription = "Image for: ${item.name}",
+//                    contentScale = ContentScale.FillHeight,
+//                    modifier = Modifier.size(80.dp)
+//                )
                 Spacer(Modifier.width(20.dp))
                 Column(
                     Modifier.padding(end = 16.dp)
@@ -152,7 +182,7 @@ private fun CartItem(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "${item.vendor}".uppercase(),
+                            text = "${item.name}".uppercase(),
                             style = MaterialTheme.typography.body2,
                         )
                         Text(
@@ -160,30 +190,26 @@ private fun CartItem(
                             style = MaterialTheme.typography.body2,
                         )
                     }
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.subtitle2,
-                    )
                 }
             }
         }
     }
 }
 
-@Preview(name = "Cart item")
-@Composable
-fun CartItemPreview() {
-    ShrineComposeTheme {
-        Surface(color = MaterialTheme.colors.secondary) {
-            CartItem(item = SampleItems[0])
-        }
-    }
-}
+//@Preview(name = "Cart item")
+//@Composable
+//fun CartItemPreview() {
+//    ShrineComposeTheme {
+//        Surface(color = MaterialTheme.colors.secondary) {
+//            CartItem(item = SampleItems[0])
+//        }
+//    }
+//}
 
 data class ExpandedCartItem(
     val idx: Int,
     val visible: MutableTransitionState<Boolean> = MutableTransitionState(true),
-    val data: ItemData
+    val data: Products
 )
 
 @Composable
@@ -224,13 +250,13 @@ fun ExpandedCart(
     }
 }
 
-@Preview(device = Devices.PIXEL_4)
-@Composable
-fun ExpandedCartPreview() {
-    ShrineComposeTheme {
-        ExpandedCart(SampleItems.mapIndexed { idx, it -> ExpandedCartItem(idx = idx, data = it) })
-    }
-}
+//@Preview(device = Devices.PIXEL_4)
+//@Composable
+//fun ExpandedCartPreview() {
+//    ShrineComposeTheme {
+//        ExpandedCart(SampleItems.mapIndexed { idx, it -> ExpandedCartItem(idx = idx, data = it) })
+//    }
+//}
 
 @Composable
 private fun CheckoutButton() {
@@ -251,7 +277,7 @@ private fun CheckoutButton() {
 
 @Composable
 private fun CollapsedCart(
-    items: List<ItemData> = SampleItems.take(6),
+    items: List<Products>,
     onTap: () -> Unit = {}
 ) {
     Row(
@@ -289,35 +315,64 @@ private fun CollapsedCart(
 }
 
 @Composable
-private fun CollapsedCartItem(data: ItemData) {
-    Image(
-        painter = painterResource(id = data.photoResId),
-        contentDescription = data.title,
+private fun CollapsedCartItem(data: Products) {
+    CoilImage(
+        imageModel = "https://picsum.photos/200/200",
+        shimmerParams = ShimmerParams(
+            baseColor = Color.White,
+            highlightColor = Color.Gray,
+            durationMillis = 500,
+            dropOff = 0.65F,
+            tilt = 20F
+        ),
+        failure = {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.image_not_available),
+                    contentDescription = "no image"
+                )
+            }
+        },
         alignment = Alignment.TopCenter,
+        previewPlaceholder = R.drawable.popcorn,
         contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .size(40.dp)
-            .clip(RoundedCornerShape(10.dp))
+        circularReveal = CircularReveal(duration = 1000),
+        modifier = Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)),
+        contentDescription = "Product item"
     )
+
+//    Image(
+//        painter = painterResource(id = data.photoResId),
+//        contentDescription = data.title,
+//        alignment = Alignment.TopCenter,
+//        contentScale = ContentScale.Crop,
+//        modifier = Modifier
+//            .size(40.dp)
+//            .clip(RoundedCornerShape(10.dp))
+//    )
 }
 
-@Preview
-@Composable
-fun CollapsedCartPreview() {
-    ShrineComposeTheme {
-        Surface(
-            color = MaterialTheme.colors.secondary
-        ) {
-            CollapsedCart()
-        }
-    }
-}
+//@Preview
+//@Composable
+//fun CollapsedCartPreview() {
+//    ShrineComposeTheme {
+//        Surface(
+//            color = MaterialTheme.colors.secondary
+//        ) {
+//            CollapsedCart()
+//        }
+//    }
+//}
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CartBottomSheet(
     modifier: Modifier = Modifier,
-    items: List<ItemData> = SampleItems.take(14),
+    items: List<Products>,
     maxHeight: Dp,
     maxWidth: Dp,
     sheetState: CartBottomSheetState = CartBottomSheetState.Collapsed,
@@ -456,35 +511,35 @@ fun CartBottomSheet(
     }
 }
 
-@Preview(device = Devices.PIXEL_4)
-@Composable
-fun CartBottomSheetPreview() {
-    ShrineComposeTheme {
-        BoxWithConstraints(
-            Modifier.fillMaxSize()
-        ) {
-            var sheetState by remember { mutableStateOf(CartBottomSheetState.Collapsed) }
-
-            Button(
-                onClick = {
-                    if (sheetState == CartBottomSheetState.Collapsed) {
-                        sheetState = CartBottomSheetState.Hidden
-                    } else {
-                        sheetState = CartBottomSheetState.Collapsed
-                    }
-                }
-            ) {
-                Text("Toggle BottomSheet")
-            }
-
-            CartBottomSheet(
-                modifier = Modifier.align(Alignment.BottomEnd),
-                sheetState = sheetState,
-                maxHeight = maxHeight,
-                maxWidth = maxWidth
-            ) {
-                sheetState = it
-            }
-        }
-    }
-}
+//@Preview(device = Devices.PIXEL_4)
+//@Composable
+//fun CartBottomSheetPreview() {
+//    ShrineComposeTheme {
+//        BoxWithConstraints(
+//            Modifier.fillMaxSize()
+//        ) {
+//            var sheetState by remember { mutableStateOf(CartBottomSheetState.Collapsed) }
+//
+//            Button(
+//                onClick = {
+//                    if (sheetState == CartBottomSheetState.Collapsed) {
+//                        sheetState = CartBottomSheetState.Hidden
+//                    } else {
+//                        sheetState = CartBottomSheetState.Collapsed
+//                    }
+//                }
+//            ) {
+//                Text("Toggle BottomSheet")
+//            }
+//
+//            CartBottomSheet(
+//                modifier = Modifier.align(Alignment.BottomEnd),
+//                sheetState = sheetState,
+//                maxHeight = maxHeight,
+//                maxWidth = maxWidth
+//            ) {
+//                sheetState = it
+//            }
+//        }
+//    }
+//}

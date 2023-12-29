@@ -1,4 +1,4 @@
-package com.example.shrine_ecommerce
+package com.example.shrine_ecommerce.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Size

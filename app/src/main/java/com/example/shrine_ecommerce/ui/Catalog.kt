@@ -1,6 +1,7 @@
-package com.example.shrine_ecommerce
+package com.example.shrine_ecommerce.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -26,19 +28,31 @@ import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.example.shrine_ecommerce.R
+import com.example.shrine_ecommerce.utils.Category
+import com.example.shrine_ecommerce.utils.ItemData
+import com.example.shrine_ecommerce.model.Products
+import com.example.shrine_ecommerce.utils.SampleItems
+import com.example.shrine_ecommerce.utils.getVendorResId
 import com.example.shrine_ecommerce.ui.theme.ShrineComposeTheme
+import com.example.shrine_ecommerce.utils.Vendor
+import com.skydoves.landscapist.CircularReveal
+import com.skydoves.landscapist.ShimmerParams
+import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
 private fun CatalogCard(
     modifier: Modifier = Modifier,
-    data: ItemData,
-    onAdd: (ItemData) -> Unit
+    data: Products,
+    onAdd: (Products) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -48,14 +62,42 @@ private fun CatalogCard(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(Modifier.weight(1f)) {
-            Image(
-                painter = painterResource(id = data.photoResId),
-                contentDescription = "Photo of ${data.title}",
+            CoilImage(
+                imageModel = "https://picsum.photos/200/200",
+                shimmerParams = ShimmerParams(
+                    baseColor = Color.White,
+                    highlightColor = Color.Gray,
+                    durationMillis = 500,
+                    dropOff = 0.65F,
+                    tilt = 20F
+                ),
+                failure = {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.image_not_available),
+                            contentDescription = "no image"
+                        )
+                    }
+                },
+                previewPlaceholder = R.drawable.popcorn,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
+                circularReveal = CircularReveal(duration = 1000),
+                modifier = modifier.clip(RoundedCornerShape(8.dp)),
+                contentDescription = "Product item"
             )
+
+//            Image(
+//                painter = painterResource(id = data.images[0].url),
+//                contentDescription = "Photo of ${data.title}",
+//                contentScale = ContentScale.Crop,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .fillMaxHeight()
+//            )
             Icon(
                 imageVector = Icons.Outlined.AddCircle,
                 contentDescription = "Add to shopping cart",
@@ -64,7 +106,7 @@ private fun CatalogCard(
                     .align(Alignment.TopStart)
             )
             Image(
-                painter = painterResource(id = getVendorResId(data.vendor)),
+                painter = painterResource(id = getVendorResId(Vendor.Alphi)),
                 contentDescription = "Vendor logo",
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -72,7 +114,7 @@ private fun CatalogCard(
             )
         }
         Spacer(Modifier.height(20.dp))
-        Text(data.title, style = MaterialTheme.typography.subtitle2)
+        Text(data.name, style = MaterialTheme.typography.subtitle2)
         Text(
             "\$${data.price}",
             style = MaterialTheme.typography.body2,
@@ -81,23 +123,23 @@ private fun CatalogCard(
     }
 }
 
-@Preview
-@Composable
-fun CatalogCardPreview() {
-    ShrineComposeTheme {
-        CatalogCard(
-            modifier = Modifier.height(380.dp),
-            data = SampleItems[0],
-            onAdd = { println(it) }
-        )
-    }
-}
+//@Preview
+//@Composable
+//fun CatalogCardPreview() {
+//    ShrineComposeTheme {
+//        CatalogCard(
+//            modifier = Modifier.height(380.dp),
+//            data = SampleItems[0],
+//            onAdd = { println(it) }
+//        )
+//    }
+//}
 
 @Composable
 fun Catalog(
     modifier: Modifier = Modifier,
-    items: List<ItemData>,
-    onAddCartItem: (ItemData) -> Unit = {}
+    items: List<Products>,
+    onAddCartItem: (Products) -> Unit = {}
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
 
@@ -174,16 +216,16 @@ private fun <T> transformToWeavedList(items: List<T>): List<List<T>> {
     return list.toList()
 }
 
-@Preview
-@Composable
-fun CatalogPreview() {
-    ShrineComposeTheme {
-        Surface {
-            Box(
-                Modifier.fillMaxSize()
-            ) {
-                Catalog(items = SampleItems.filter { it.category == Category.Accessories })
-            }
-        }
-    }
-}
+//@Preview
+//@Composable
+//fun CatalogPreview() {
+//    ShrineComposeTheme {
+//        Surface {
+//            Box(
+//                Modifier.fillMaxSize()
+//            ) {
+//                Catalog(items = SampleItems.filter { it.category == Category.Accessories })
+//            }
+//        }
+//    }
+//}
