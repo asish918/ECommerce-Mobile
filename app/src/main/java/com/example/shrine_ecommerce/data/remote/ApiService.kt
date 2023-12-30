@@ -1,7 +1,5 @@
 package com.example.shrine_ecommerce.data.remote
 
-import com.example.shrine_ecommerce.data.remote.response.CategoryResponse
-import com.example.shrine_ecommerce.data.remote.response.ProductResponse
 import com.example.shrine_ecommerce.model.Category
 import com.example.shrine_ecommerce.model.Products
 import retrofit2.http.GET

@@ -66,7 +66,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.shrine_ecommerce.R
-import com.example.shrine_ecommerce.utils.ItemData
 import com.example.shrine_ecommerce.ui.theme.ShrineScrimColor
 import com.example.shrine_ecommerce.ui.theme.ShrineComposeTheme
 import com.example.shrine_ecommerce.model.Category

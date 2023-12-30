@@ -1,5 +1,7 @@
 package com.example.shrine_ecommerce.ui
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -55,6 +57,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,10 +73,10 @@ import androidx.compose.ui.unit.dp
 import com.example.shrine_ecommerce.R
 import com.example.shrine_ecommerce.model.Products
 import com.example.shrine_ecommerce.ui.theme.ShrineComposeTheme
-import com.example.shrine_ecommerce.utils.Vendor
 import com.skydoves.landscapist.CircularReveal
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
+import kotlinx.coroutines.launch
 import kotlin.math.min
 
 @Composable
@@ -116,7 +119,7 @@ fun CartHeaderPreview() {
 private fun CartItem(
     modifier: Modifier = Modifier,
     item: Products,
-    onRemoveAction: () -> Unit = {}
+    onRemoveAction: () -> Unit = {},
 ) {
     Row(
         modifier.fillMaxWidth(),
@@ -140,7 +143,11 @@ private fun CartItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CoilImage(
-                    imageModel = "https://picsum/photos/200/200",
+                    imageModel = if (item.images.isEmpty()) {
+                        "https://picsum.photos/200/200"
+                    } else {
+                        item.images[0].url
+                    },
                     shimmerParams = ShimmerParams(
                         baseColor = Color.White,
                         highlightColor = Color.Gray,
@@ -182,11 +189,11 @@ private fun CartItem(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "${item.name}".uppercase(),
+                            text = item.name.uppercase(),
                             style = MaterialTheme.typography.body2,
                         )
                         Text(
-                            text = "$${item.price}",
+                            text = "₹${item.price}",
                             style = MaterialTheme.typography.body2,
                         )
                     }
@@ -209,14 +216,14 @@ private fun CartItem(
 data class ExpandedCartItem(
     val idx: Int,
     val visible: MutableTransitionState<Boolean> = MutableTransitionState(true),
-    val data: Products
+    val data: Products,
 )
 
 @Composable
 fun ExpandedCart(
     cartItems: List<ExpandedCartItem>,
     onRemoveItem: (ExpandedCartItem) -> Unit = {},
-    onCollapse: () -> Unit = {}
+    onCollapse: () -> Unit = {},
 ) {
     Surface(
         color = MaterialTheme.colors.secondary
@@ -238,7 +245,12 @@ fun ExpandedCart(
             ) { _, it ->
                 AnimatedVisibility(
                     visibleState = it.visible,
-                    exit = fadeOut() + slideOut(targetOffset = { IntOffset(x = -it.width / 2, y = 0) })
+                    exit = fadeOut() + slideOut(targetOffset = {
+                        IntOffset(
+                            x = -it.width / 2,
+                            y = 0
+                        )
+                    })
                 ) {
                     CartItem(
                         item = it.data,
@@ -259,12 +271,20 @@ fun ExpandedCart(
 //}
 
 @Composable
-private fun CheckoutButton() {
+private fun CheckoutButton(
+    context: Context
+) {
+    val scope = rememberCoroutineScope()
+
     Button(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxWidth(),
-        onClick = {}
+        onClick = {
+            scope.launch {
+                Toast.makeText(context, "✅Order Placed", Toast.LENGTH_SHORT).show()
+            }
+        }
     ) {
         Icon(
             imageVector = Icons.Outlined.ShoppingCart,
@@ -278,7 +298,7 @@ private fun CheckoutButton() {
 @Composable
 private fun CollapsedCart(
     items: List<Products>,
-    onTap: () -> Unit = {}
+    onTap: () -> Unit = {},
 ) {
     Row(
         Modifier
@@ -317,7 +337,11 @@ private fun CollapsedCart(
 @Composable
 private fun CollapsedCartItem(data: Products) {
     CoilImage(
-        imageModel = "https://picsum.photos/200/200",
+        imageModel = if (data.images.isEmpty()) {
+            "https://picsum.photos/200/200"
+        } else {
+            data.images[0].url
+        },
         shimmerParams = ShimmerParams(
             baseColor = Color.White,
             highlightColor = Color.Gray,
@@ -341,7 +365,9 @@ private fun CollapsedCartItem(data: Products) {
         previewPlaceholder = R.drawable.popcorn,
         contentScale = ContentScale.Crop,
         circularReveal = CircularReveal(duration = 1000),
-        modifier = Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)),
+        modifier = Modifier
+            .size(40.dp)
+            .clip(RoundedCornerShape(10.dp)),
         contentDescription = "Product item"
     )
 
@@ -377,7 +403,8 @@ fun CartBottomSheet(
     maxWidth: Dp,
     sheetState: CartBottomSheetState = CartBottomSheetState.Collapsed,
     onRemoveItemFromCart: (Int) -> Unit = {},
-    onSheetStateChange: (CartBottomSheetState) -> Unit = {}
+    onSheetStateChange: (CartBottomSheetState) -> Unit = {},
+    context: Context
 ) {
     val expandedCartItems by remember(items) {
         derivedStateOf {
@@ -408,8 +435,10 @@ fun CartBottomSheet(
             when {
                 CartBottomSheetState.Expanded isTransitioningTo CartBottomSheetState.Collapsed ->
                     tween(durationMillis = 433, delayMillis = 67)
+
                 CartBottomSheetState.Collapsed isTransitioningTo CartBottomSheetState.Expanded ->
                     tween(durationMillis = 150)
+
                 else ->
                     tween(durationMillis = 450)
             }
@@ -433,6 +462,7 @@ fun CartBottomSheet(
             when {
                 CartBottomSheetState.Expanded isTransitioningTo CartBottomSheetState.Collapsed ->
                     tween(durationMillis = 283)
+
                 else ->
                     tween(durationMillis = 500)
             }
@@ -447,6 +477,7 @@ fun CartBottomSheet(
             when {
                 CartBottomSheetState.Expanded isTransitioningTo CartBottomSheetState.Collapsed ->
                     tween(durationMillis = 433, delayMillis = 67)
+
                 else ->
                     tween(durationMillis = 150)
             }
@@ -469,11 +500,35 @@ fun CartBottomSheet(
                 transitionSpec = {
                     when {
                         CartBottomSheetState.Expanded isTransitioningTo CartBottomSheetState.Collapsed ->
-                            fadeIn(animationSpec = tween(durationMillis = 117, delayMillis = 117, easing = LinearEasing)) togetherWith
-                                fadeOut(animationSpec = tween(durationMillis = 117, easing = LinearEasing))
+                            fadeIn(
+                                animationSpec = tween(
+                                    durationMillis = 117,
+                                    delayMillis = 117,
+                                    easing = LinearEasing
+                                )
+                            ) togetherWith
+                                    fadeOut(
+                                        animationSpec = tween(
+                                            durationMillis = 117,
+                                            easing = LinearEasing
+                                        )
+                                    )
+
                         CartBottomSheetState.Collapsed isTransitioningTo CartBottomSheetState.Expanded ->
-                            fadeIn(animationSpec = tween(durationMillis = 150, delayMillis = 150, easing = LinearEasing)) togetherWith
-                                fadeOut(animationSpec = tween(durationMillis = 150, easing = LinearEasing))
+                            fadeIn(
+                                animationSpec = tween(
+                                    durationMillis = 150,
+                                    delayMillis = 150,
+                                    easing = LinearEasing
+                                )
+                            ) togetherWith
+                                    fadeOut(
+                                        animationSpec = tween(
+                                            durationMillis = 150,
+                                            easing = LinearEasing
+                                        )
+                                    )
+
                         else -> EnterTransition.None togetherWith ExitTransition.None
                     }.using(SizeTransform(clip = false))
                 },
@@ -500,12 +555,29 @@ fun CartBottomSheet(
             cartTransition.AnimatedVisibility(
                 modifier = Modifier.align(Alignment.BottomCenter),
                 visible = { it == CartBottomSheetState.Expanded },
-                enter = fadeIn(animationSpec = tween(durationMillis = 150, delayMillis = 150, easing = LinearEasing)) +
-                    scaleIn(animationSpec = tween(durationMillis = 250, delayMillis = 250, easing = LinearOutSlowInEasing), initialScale = 0.8f),
+                enter = fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 150,
+                        delayMillis = 150,
+                        easing = LinearEasing
+                    )
+                ) +
+                        scaleIn(
+                            animationSpec = tween(
+                                durationMillis = 250,
+                                delayMillis = 250,
+                                easing = LinearOutSlowInEasing
+                            ), initialScale = 0.8f
+                        ),
                 exit = fadeOut(animationSpec = tween(durationMillis = 117, easing = LinearEasing)) +
-                    scaleOut(animationSpec = tween(durationMillis = 100, easing = FastOutLinearInEasing), targetScale = 0.8f)
+                        scaleOut(
+                            animationSpec = tween(
+                                durationMillis = 100,
+                                easing = FastOutLinearInEasing
+                            ), targetScale = 0.8f
+                        )
             ) {
-                CheckoutButton()
+                CheckoutButton(context)
             }
         }
     }

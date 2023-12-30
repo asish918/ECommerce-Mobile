@@ -1,5 +1,6 @@
 package com.example.shrine_ecommerce.ui
 
+import android.content.Context
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
@@ -13,14 +14,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.shrine_ecommerce.utils.SampleItems
 import com.example.shrine_ecommerce.viewmodels.HomeViewModel
-import dagger.hilt.android.HiltAndroidApp
 
 @ExperimentalMaterialApi
 @Composable
 fun ShrineApp(
     homeViewModel: HomeViewModel = hiltViewModel(),
+    context: Context
 ) {
     val products = homeViewModel.productList
     var sheetState by rememberSaveable { mutableStateOf(CartBottomSheetState.Collapsed) }
@@ -50,7 +50,8 @@ fun ShrineApp(
             },
             onSheetStateChange = {
                 sheetState = it
-            }
+            },
+            context = context
         )
     }
 }
